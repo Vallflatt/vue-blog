@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
-  const periods = ['Today', 'This Week', 'This Month'] as const;
+import TimelineItem from "./TimelineItem.vue";
+import {usePosts} from "../stores/posts.ts";
+import {periods} from "../constants.ts";
 
-  type Period = typeof periods[number];
+const postsStore = usePosts();
 
-  const selectedPeriod = ref<Period>('Today');
-
-  function selectPeriod (period: Period): void {
-    selectedPeriod.value = period;
-  }
+await postsStore.fetchPosts();
 </script>
 
 <template>
@@ -16,11 +13,15 @@ import { ref } from "vue";
     <span class="panel-tabs">
       <a v-for="period in periods"
          :key="period"
-         @click="selectPeriod(period)"
-         :class="{'is-active': selectedPeriod === period}"
+         @click="postsStore.setSelectedPeriod(period)"
+         :class="{'is-active': postsStore.selectedPeriod === period}"
       >
         {{period}}
       </a>
     </span>
+    <TimelineItem v-for="post of postsStore.filteredPosts"
+                  :key="post.id"
+                  :post="post">
+    </TimelineItem>
   </nav>
 </template>
